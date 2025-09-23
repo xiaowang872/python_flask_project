@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 包含跳转链接</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #74ebd5, #9face6);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        .nav-link {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #74ebd5, #9face6);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .content {
+            line-height: 1.6;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 Flask应用首页</h1>
+
+        <div class="nav-links">
+            <a href="{{ url_for('tmp_page') }}" class="nav-link">
+                📄 访问临时页面
+            </a>
+            <a href="/tmp" class="nav-link">
+                🔗 直接链接跳转
+            </a>
+            <a href="http://127.0.0.1:5000/tmp" class="nav-link">
+                🌐 完整URL跳转
+            </a>
+        </div>
+
+        <div class="content">
+            <h2>三种跳转方式：</h2>
+            <p>1. <strong>使用url_for</strong>：<code>&lt;a href="{{ url_for('tmp_page') }}"&gt;</code></p>
+            <p>2. <strong>相对路径</strong>：<code>&lt;a href="/tmp"&gt;</code></p>
+            <p>3. <strong>绝对路径</strong>：<code>&lt;a href="http://127.0.0.1:5000/tmp"&gt;</code></p>
+
+            <p>推荐使用第一种方式（url_for），因为即使路由路径改变，链接也会自动更新。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask 表单应用</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: #6e8efb;
+            outline: none;
+        }
+        
+        button {
+            background: linear-gradient(to right, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .result p {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+        
+        .error {
+            color: #e74c3c;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        footer {
+            margin-top: 30px;
+            color: #777;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>个人信息表单</h1>
+        <p class="description">请输入您的信息，提交后我们将生成一条个性化消息。</p>
+        
+        <form id="userForm">
+            <div class="form-group">
+                <label for="name">您的姓名：</label>
+                <input type="text" id="name" name="name" required>
+                <div class="error" id="nameError">请输入您的姓名</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">居住地：</label>
+                <input type="text" id="location" name="location" required>
+                <div class="error" id="locationError">请输入您的居住地</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="age">居住年限：</label>
+                <input type="number" id="age" name="age" min="1" max="120" required>
+                <div class="error" id="ageError">请输入有效的居住年限（1-120）</div>
+            </div>
+            
+            <button type="submit">提交信息</button>
+        </form>
+        
+        <div class="result" id="result">
+            <h3>您的个性化消息：</h3>
+            <p id="messageText"></p>
+        </div>
+        
+        <footer>
+            <p>Flask 表单处理示例应用</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 隐藏所有错误信息
+            document.querySelectorAll('.error').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // 获取表单值
+            const name = document.getElementById('name').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const age = document.getElementById('age').value.trim();
+            
+            // 简单验证
+            let isValid = true;
+            
+            if (!name) {
+                document.getElementById('nameError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!location) {
+                document.getElementById('locationError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!age || age < 1 || age > 120) {
+                document.getElementById('ageError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            try {
+                // 发送数据到服务器
+                const response = await fetch('/route_message_parameter/message_form', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'name': name,
+                        'location': location,
+                        'age': age
+                    })
+                });
+                
+                if (response.ok) {
+                    const message = await response.text();
+                    document.getElementById('messageText').textContent = message;
+                    document.getElementById('result').style.display = 'block';
+                } else {
+                    throw new Error('服务器返回错误');
+                }
+            } catch (error) {
+                alert('提交失败，请稍后重试: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

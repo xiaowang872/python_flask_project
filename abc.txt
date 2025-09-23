@@ -1,0 +1,55 @@
+Flask路由测试结果
+==================================================
+
+路由: /add
+时间: 2025-09-19 10:30:56
+错误: Expecting value: line 1 column 1 (char 0)
+------------------------------
+
+路由: /query1
+时间: 2025-09-19 10:30:56
+状态码: 200
+响应数据:
+  users: 
+    {'avatar_url': None, 'id': 1, 'mobile': '13888888888', 'nickname': 'flask_test1', 'sex': '0'}
+    {'avatar_url': None, 'id': 2, 'mobile': '13999999999', 'nickname': 'flask_test2', 'sex': '0'}
+    {'avatar_url': None, 'id': 3, 'mobile': '13777777777', 'nickname': 'flask_test3', 'sex': '0'}
+    {'avatar_url': None, 'id': 4, 'mobile': '13666666666', 'nickname': 'flask_test4', 'sex': '0'}
+    {'avatar_url': None, 'id': 5, 'mobile': '13888888888', 'nickname': 'flask_test1', 'sex': '0'}
+    {'avatar_url': None, 'id': 6, 'mobile': '13999999999', 'nickname': 'flask_test2', 'sex': '0'}
+    {'avatar_url': None, 'id': 7, 'mobile': '13777777777', 'nickname': 'flask_test3', 'sex': '0'}
+    {'avatar_url': None, 'id': 8, 'mobile': '13666666666', 'nickname': 'flask_test4', 'sex': '0'}
+------------------------------
+
+路由: /query2
+时间: 2025-09-19 10:30:57
+状态码: 200
+响应数据:
+  users: {'avatar_url': None, 'id': 3, 'mobile': '13777777777', 'nickname': 'flask_test3', 'sex': '0'}
+------------------------------
+
+路由: /query3
+时间: 2025-09-19 10:30:57
+状态码: 200
+响应数据:
+  users: {'avatar_url': None, 'id': 1, 'mobile': '13888888888', 'nickname': 'flask_test1', 'sex': '0'}
+------------------------------
+
+路由: /query4
+时间: 2025-09-19 10:30:58
+状态码: 200
+响应数据:
+  users: 
+    {'avatar_url': None, 'id': 1, 'mobile': '13888888888', 'nickname': 'flask_test1', 'sex': '0'}
+    {'avatar_url': None, 'id': 5, 'mobile': '13888888888', 'nickname': 'flask_test1', 'sex': '0'}
+------------------------------
+
+路由: /query5
+时间: 2025-09-19 10:30:58
+状态码: 200
+响应数据:
+  users: 
+    {'avatar_url': None, 'id': 2, 'mobile': '13999999999', 'nickname': 'flask_test2', 'sex': '0'}
+    {'avatar_url': None, 'id': 6, 'mobile': '13999999999', 'nickname': 'flask_test2', 'sex': '0'}
+------------------------------
+

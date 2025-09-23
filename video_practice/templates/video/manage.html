@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频管理 - 我的视频网站</title>
+    <link rel="stylesheet" href="{{ url_for('video.static', filename='css/manage_video_practice.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 视频管理</h1>
+            <p>管理您上传的视频内容</p>
+        </div>
+
+        <div class="nav">
+            <a href="{{ url_for('video.video_index') }}" class="btn btn-secondary">
+                ← 返回视频列表
+            </a>
+            <a href="{{ url_for('video.video_upload') }}" class="btn btn-primary">
+                📤 上传新视频
+            </a>
+        </div>
+
+        <!-- 显示Flash消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ videos|length }}</div>
+                <div class="stat-label">总视频数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2.5GB</div>
+                <div class="stat-label">总存储空间</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">1,234</div>
+                <div class="stat-label">总观看次数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">48</div>
+                <div class="stat-label">今日观看次数</div>
+            </div>
+        </div>
+
+        <div class="videos-table">
+            {% if videos %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>视频标题</th>
+                        <th>上传日期</th>
+                        <th>文件大小</th>
+                        <th>状态</th>
+                        <th>观看次数</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for video in videos %}
+                    <tr>
+                        <td>
+                            <strong>{{ video.title }}</strong>
+                            <br>
+                            <small style="color: #7f8c8d;">ID: {{ video.id }}</small>
+                        </td>
+                        <td>{{ video.upload_date }}</td>
+                        <td>{{ video.size }}</td>
+                        <td>
+                            <span class="status-badge status-completed">已发布</span>
+                        </td>
+                        <td>321 次</td>
+                        <td class="action-buttons">
+                            <a href="{{ url_for('video.play_video', video_id=video.id) }}" 
+                               class="btn btn-primary" style="padding: 5px 10px; font-size: 0.9rem;">
+                                观看
+                            </a>
+                            <form action="{{ url_for('video.delete_video', video_id=video.id) }}" 
+                                  method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-danger" 
+                                        style="padding: 5px 10px; font-size: 0.9rem;"
+                                        onclick="return confirm('确定要删除这个视频吗？此操作不可恢复。')">
+                                    删除
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <h3>📭 还没有上传视频</h3>
+                <p>您还没有上传任何视频，点击上方按钮开始上传吧！</p>
+                <a href="{{ url_for('video.video_upload') }}" class="btn btn-primary" style="margin-top: 20px;">
+                    上传第一个视频
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if videos %}
+        <div style="margin-top: 20px; text-align: center; color: #7f8c8d;">
+            显示 {{ videos|length }} 个视频中的 1-{{ videos|length }}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频首页 - 我的视频网站</title>
+    <link rel="stylesheet" href="{{ url_for('video.static', filename='css/index_video_practice.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 我的视频网站</h1>
+            <p>发现精彩视频内容</p>
+        </header>
+
+        <div class="nav">
+            <h2>视频列表</h2>
+            <div class="nav-links">
+                <a href="{{ url_for('video.video_upload') }}">上传视频</a>
+                <a href="{{ url_for('video.manage_videos') }}">管理视频</a>
+            </div>
+        </div>
+
+        <!-- 显示Flash消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="video-grid">
+            {% for video in videos %}
+            <div class="video-card">
+                <div class="video-thumbnail">
+                    <span>🎥</span>
+                </div>
+                <div class="video-info">
+                    <h3 class="video-title">{{ video.title }}</h3>
+                    <p class="video-duration">时长: {{ video.duration }}</p>
+                    <a href="{{ url_for('video.play_video', video_id=video.id) }}" class="btn">
+                        观看视频
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <footer>
+            <p>© 2024 我的视频网站. 所有权利保留.</p>
+        </footer>
+    </div>
+</body>
+</html>

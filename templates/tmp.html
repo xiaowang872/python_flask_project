@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>临时页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>临时页面 (tmp.html)</h1>
+        <p>这是一个简单的临时页面示例</p>
+        <!-- 使用url_for生成首页链接，参数是路由函数名 -->
+        <p><a href="{{ url_for('index') }}">返回首页</a></p>
+        <p><a href="{{ url_for('route_message_parameter') }}" class="nav-link">
+                🔗 参数对route的影响
+            </a>        
+        </p>
+        <p><a href="{{ url_for('Custom_routing_page') }}" class="nav-link">
+                    🔗 自定义路由
+            </a>
+        </p>
+        <p><a href="{{ url_for('tmp_page') }}">刷新当前页面</a></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传视频 - 我的视频网站</title>
+    <link rel="stylesheet" href="{{ url_for('video.static', filename='css/upload_video_practice.css') }}">
+    <link rel="stylesheet" href="{{ url_for('video.static', filename='js/upload_video_practice.js') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📤 上传视频</h1>
+            <p>分享你的精彩内容</p>
+        </div>
+
+        <div class="nav">
+            <a href="{{ url_for('video.video_index') }}" class="back-btn">
+                ← 返回视频列表
+            </a>
+        </div>
+
+        <!-- 显示Flash消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" enctype="multipart/form-data" class="upload-form">
+            <div class="form-group">
+                <label for="title">视频标题 *</label>
+                <input type="text" id="title" name="title" required 
+                       placeholder="请输入视频标题（最多100个字符）" maxlength="100">
+            </div>
+
+            <div class="form-group">
+                <label for="description">视频描述</label>
+                <textarea id="description" name="description" 
+                         placeholder="请输入视频描述（可选，最多500字）" maxlength="500"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="video_file">选择视频文件 *</label>
+                <input type="file" id="video_file" name="video_file" 
+                       accept=".mp4,.avi,.mov,.wmv,.flv,.webm,.mkv" required
+                       onchange="updateFileInfo()">
+                <div id="fileInfo" class="file-info">
+                    请选择视频文件 | 支持格式: MP4, AVI, MOV, WMV, FLV, WEBM, MKV | 最大大小: 500MB
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">开始上传</button>
+        </form>
+
+        <div class="requirements">
+            <h3>📋 上传要求</h3>
+            <ul>
+                <li>文件格式：MP4, AVI, MOV, WMV, FLV, WEBM, MKV</li>
+                <li>最大文件大小：500MB</li>
+                <li>视频时长：建议不超过2小时</li>
+                <li>分辨率：建议720p或以上</li>
+                <li>视频标题为必填项</li>
+                <li>确保内容符合社区准则</li>
+            </ul>
+        </div>
+    </div>
+
+    
+</body>
+</html>
