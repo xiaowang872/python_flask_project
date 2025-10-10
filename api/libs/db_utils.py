@@ -5,6 +5,8 @@ def session_commit():
     """提交数据库会话，并处理可能的异常"""
     try:
         db.session.commit()
+        print("提交成功!")
+        return True  # 添加成功返回True
     except SQLAlchemyError as e:
         db.session.rollback()  # 回滚会话以防止数据不一致
         reason = str(e)

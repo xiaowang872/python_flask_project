@@ -1,0 +1,14 @@
+2025-09-25 19:57:09,515 - INFO log_test_tmp.py: 156 开始用户注册流程 - 用户名: john_doe, 邮箱: john@example.com
+2025-09-25 19:57:09,515 - DEBUG log_test_tmp.py: 163 用户信息验证通过
+2025-09-25 19:57:09,515 - INFO log_test_tmp.py: 166 检查用户是否已存在
+2025-09-25 19:57:09,523 - INFO log_test_tmp.py: 174 用户 john_doe 注册成功
+2025-09-25 19:57:09,523 - INFO log_test_tmp.py: 156 开始用户注册流程 - 用户名: admin, 邮箱: admin@example.com
+2025-09-25 19:57:09,523 - DEBUG log_test_tmp.py: 163 用户信息验证通过
+2025-09-25 19:57:09,523 - INFO log_test_tmp.py: 166 检查用户是否已存在
+2025-09-25 19:57:09,523 - ERROR log_test_tmp.py: 177 用户注册失败: 管理员用户已存在
+Traceback (most recent call last):
+  File "f:\vue_flask_project\vue_flask_project_one\flask\pythonProject1\api\utils\log_test_tmp.py", line 172, in register_user
+    raise Exception("管理员用户已存在")
+Exception: 管理员用户已存在
+2025-09-25 19:57:09,523 - INFO log_test_tmp.py: 156 开始用户注册流程 - 用户名: , 邮箱: test@example.com
+2025-09-25 19:57:09,523 - ERROR log_test_tmp.py: 160 用户名或邮箱为空

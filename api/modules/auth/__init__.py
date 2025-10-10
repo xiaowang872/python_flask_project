@@ -1,3 +1,4 @@
+# F:\vue_flask_project\vue_flask_project_one\flask\pythonProject1\api\modules\auth\__init__.py
 from flask import Blueprint
 from flask_restful import Api
 

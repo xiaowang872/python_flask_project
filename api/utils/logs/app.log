@@ -1,0 +1,4 @@
+2025-09-25 19:57:09,433 - DEBUG log_test_tmp.py: 32 调试信息 - 测试setup_log
+2025-09-25 19:57:09,433 - INFO log_test_tmp.py: 33 普通信息 - 用户登录成功
+2025-09-25 19:57:09,433 - WARNING log_test_tmp.py: 34 警告信息 - 内存使用率过高
+2025-09-25 19:57:09,433 - ERROR log_test_tmp.py: 35 错误信息 - 数据库连接失败

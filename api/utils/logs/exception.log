@@ -1,0 +1,9 @@
+2025-09-25 19:57:09,467 - ERROR log_test_tmp.py: 140 发生了一个异常
+Traceback (most recent call last):
+  File "f:\vue_flask_project\vue_flask_project_one\flask\pythonProject1\api\utils\log_test_tmp.py", line 138, in test_error_with_traceback
+    simulate_error()
+  File "f:\vue_flask_project\vue_flask_project_one\flask\pythonProject1\api\utils\log_test_tmp.py", line 135, in simulate_error
+    return data["nonexistent_key"]  # 这里会抛出KeyError
+           ~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'nonexistent_key'
+2025-09-25 19:57:09,511 - ERROR log_test_tmp.py: 141 错误详情: 'nonexistent_key'

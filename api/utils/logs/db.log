@@ -1,0 +1,2 @@
+2025-09-25 19:57:09,467 - INFO log_test_tmp.py: 110 数据库连接池初始化
+2025-09-25 19:57:09,467 - INFO log_test_tmp.py: 111 执行SQL: SELECT * FROM users WHERE id = 1

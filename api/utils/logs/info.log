@@ -1,0 +1,3 @@
+2025-09-25 19:57:09,447 - DEBUG log_test_tmp.py: 58 这条DEBUG信息不会被记录
+2025-09-25 19:57:09,447 - INFO log_test_tmp.py: 59 这条INFO信息会被记录
+2025-09-25 19:57:09,447 - WARNING log_test_tmp.py: 60 这条WARNING信息会被记录

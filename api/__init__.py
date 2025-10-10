@@ -1,6 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from api.config.config import Config_dict
+from redis import StrictRedis
+from api.config import config
+from api.test_connections.test_mysql import test_mysql
 
 # guixiang留言：在项目中，一般把内个db和app的实例化，放在api文件下的__init__.py文件中
 # 在create_app函数中，可以传输一个config_name参数，方便我切换开发，测试的数据库配置
@@ -14,7 +17,38 @@ def create_app(config_name):
     config = Config_dict.get(config_name)
     app.config.from_object(config)
     db.init_app(app)
+    test_mysql(app,db)
+    global redis_store
+    # redis_store = None
+    # 创建redis的连接对象
+    redis_store = StrictRedis(
+        host=config.REDIS_HOST, 
+        port=config.REDIS_PORT,
+        decode_responses=True,
+        password=config.REDIS_PASSWORD # 密码，标记一下这是我自己添加的，后续有排查错误时，可以查看redis的连接信息
+        )
+    print(f"Redis连接信息: host={config.REDIS_HOST}, port={config.REDIS_PORT}")
+    try:
+        redis_store.ping()
+        print("✅ Redis连接成功")
+    except Exception as e:
+        print(f"❌ Redis连接失败: {e}")
+        redis_store = None
+        raise e
+
     # 延迟导入模块，避免循环导入
     from api.modules.auth import auth_blu
     app.register_blueprint(auth_blu)
+
+
+
+
+
     return app
+
+
+# redis存储
+
+
+
+

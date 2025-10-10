@@ -1,3 +1,4 @@
+# F:\vue_flask_project\vue_flask_project_one\flask\pythonProject1\api\modules\auth\login.py
 from flask import current_app
 from flask_restful import Resource, reqparse,inputs
 from api.models.user import UserLogin
@@ -5,7 +6,7 @@ from api.utils.auth_helper import Auth
 from api.utils.response_utils import error,HttpCode
 
 #Login 类继承自 Resource，表示这是一个RESTful资源
-class Login(Resource):
+class LoginView(Resource):
     '''用户登录接口'''
     def post(self):
         # 创建解析对象

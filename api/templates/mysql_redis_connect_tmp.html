@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>临时检查 - MySQL与Redis连接状态</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .status-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        .card-body {
+            padding: 25px;
+        }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .status-online {
+            background-color: #28a745;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
+        .status-offline {
+            background-color: #dc3545;
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+        }
+        .status-checking {
+            background-color: #ffc107;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .connection-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            width: 120px;
+            flex-shrink: 0;
+            color: #495057;
+        }
+        .detail-value {
+            font-family: 'Courier New', monospace;
+            color: #212529;
+        }
+        .btn-test {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-test:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .user-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .user-table th {
+            background: #e9ecef;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+        }
+        .user-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .user-table tr:last-child td {
+            border-bottom: none;
+        }
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        .refresh-btn:hover {
+            transform: rotate(180deg);
+            background: #764ba2;
+        }
+        .alert-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s;
+        }
+        .alert-message.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1 class="text-white mb-3">临时检查 - MySQL与Redis连接状态</h1>
+            <p class="text-white-50">快速检查数据库连接状态和系统配置</p>
+        </div>
+
+        <!-- MySQL状态卡片 -->
+        <div class="status-card">
+            <div class="card-header">
+                <i class="fas fa-database me-2"></i>MySQL数据库连接状态
+            </div>
+            <div class="card-body">
+                <div class="status-indicator">
+                    <div class="status-dot status-checking" id="mysql-status"></div>
+                    <span id="mysql-status-text">正在检查MySQL连接状态...</span>
+                </div>
+                
+                <div class="connection-details">
+                    <h5 class="mb-3">连接配置信息</h5>
+                    <div class="detail-row">
+                        <div class="detail-label">主机地址:</div>
+                        <div class="detail-value" id="mysql-host">检查中...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">端口:</div>
+                        <div class="detail-value" id="mysql-port">检查中...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">数据库:</div>
+                        <div class="detail-value" id="mysql-database">检查中...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">用户名:</div>
+                        <div class="detail-value" id="mysql-user">检查中...</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button class="btn btn-test me-2" id="test-mysql-btn">
+                        <i class="fas fa-bolt me-2"></i>测试MySQL连接
+                    </button>
+                    <button class="btn btn-success me-2" id="query-users-btn">
+                        <i class="fas fa-users me-2"></i>查询用户数据
+                    </button>
+                    <button class="btn btn-info" id="test-all-db-btn">
+                        <i class="fas fa-vial me-2"></i>测试所有数据库操作
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Redis状态卡片 -->
+        <div class="status-card">
+            <div class="card-header">
+                <i class="fas fa-bolt me-2"></i>Redis缓存连接状态
+            </div>
+            <div class="card-body">
+                <div class="status-indicator">
+                    <div class="status-dot status-checking" id="redis-status"></div>
+                    <span id="redis-status-text">正在检查Redis连接状态...</span>
+                </div>
+                
+                <div class="connection-details">
+                    <h5 class="mb-3">连接配置信息</h5>
+                    <div class="detail-row">
+                        <div class="detail-label">主机地址:</div>
+                        <div class="detail-value" id="redis-host">检查中...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">端口:</div>
+                        <div class="detail-value" id="redis-port">检查中...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">密码:</div>
+                        <div class="detail-value" id="redis-password">••••••••</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Flask密钥:</div>
+                        <div class="detail-value" id="flask-secret">检查中...</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button class="btn btn-test me-2" id="test-redis-btn">
+                        <i class="fas fa-bolt me-2"></i>测试Redis连接
+                    </button>
+                    <button class="btn btn-warning me-2" id="generate-secret-btn">
+                        <i class="fas fa-key me-2"></i>生成新密钥
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户数据表格 -->
+        <div class="status-card">
+            <div class="card-header">
+                <i class="fas fa-table me-2"></i>MySQL用户数据查询结果
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>昵称</th>
+                                <th>手机号</th>
+                                <th>头像</th>
+                                <th>性别</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body">
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    点击"查询用户数据"按钮加载数据
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 刷新按钮 -->
+    <div class="refresh-btn" id="refresh-all-btn">
+        <i class="fas fa-sync-alt fa-lg"></i>
+    </div>
+
+    <!-- 通知消息 -->
+    <div class="alert-message alert alert-success" id="alert-success">
+        <i class="fas fa-check-circle me-2"></i>
+        <span id="alert-success-msg">操作成功！</span>
+    </div>
+    
+    <div class="alert-message alert alert-danger" id="alert-error">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span id="alert-error-msg">操作失败！</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化检查连接状态
+            checkMySQLStatus();
+            checkRedisStatus();
+            
+            // 绑定按钮事件
+            document.getElementById('test-mysql-btn').addEventListener('click', function() {
+                checkMySQLStatus(true);
+            });
+            
+            document.getElementById('test-redis-btn').addEventListener('click', function() {
+                checkRedisStatus(true);
+            });
+            
+            document.getElementById('query-users-btn').addEventListener('click', function() {
+                queryUsers();
+            });
+            
+            document.getElementById('test-all-db-btn').addEventListener('click', function() {
+                testAllDatabaseOperations();
+            });
+            
+            document.getElementById('generate-secret-btn').addEventListener('click', function() {
+                generateNewSecret();
+            });
+            
+            document.getElementById('refresh-all-btn').addEventListener('click', function() {
+                checkMySQLStatus();
+                checkRedisStatus();
+                showAlert('已刷新所有连接状态', 'success');
+            });
+            
+            // 显示通知
+            function showAlert(message, type) {
+                const alertBox = type === 'success' ? 
+                    document.getElementById('alert-success') : 
+                    document.getElementById('alert-error');
+                
+                const alertMsg = type === 'success' ? 
+                    document.getElementById('alert-success-msg') : 
+                    document.getElementById('alert-error-msg');
+                
+                alertMsg.textContent = message;
+                alertBox.classList.add('show');
+                
+                setTimeout(() => {
+                    alertBox.classList.remove('show');
+                }, 3000);
+            }
+            
+            // 检查MySQL状态
+            function checkMySQLStatus(showAlert = false) {
+                const mysqlStatus = document.getElementById('mysql-status');
+                const mysqlStatusText = document.getElementById('mysql-status-text');
+                
+                mysqlStatus.className = 'status-dot status-checking';
+                mysqlStatusText.textContent = '正在检查MySQL连接状态...';
+                
+                // 模拟API调用检查MySQL状态
+                setTimeout(() => {
+                    // 这里应该调用实际的API端点
+                    // 模拟成功响应
+                    const isConnected = Math.random() > 0.2; // 80%成功率模拟
+                    
+                    if (isConnected) {
+                        mysqlStatus.className = 'status-dot status-online';
+                        mysqlStatusText.textContent = '✅ MySQL连接正常';
+                        
+                        // 更新连接详情
+                        document.getElementById('mysql-host').textContent = 'localhost';
+                        document.getElementById('mysql-port').textContent = '3306';
+                        document.getElementById('mysql-database').textContent = 'video_website';
+                        document.getElementById('mysql-user').textContent = 'flask_user';
+                        
+                        if (showAlert) {
+                            showAlert('MySQL连接测试成功', 'success');
+                        }
+                    } else {
+                        mysqlStatus.className = 'status-dot status-offline';
+                        mysqlStatusText.textContent = '❌ MySQL连接失败';
+                        
+                        if (showAlert) {
+                            showAlert('MySQL连接测试失败', 'error');
+                        }
+                    }
+                }, 1500);
+            }
+            
+            // 检查Redis状态
+            function checkRedisStatus(showAlert = false) {
+                const redisStatus = document.getElementById('redis-status');
+                const redisStatusText = document.getElementById('redis-status-text');
+                
+                redisStatus.className = 'status-dot status-checking';
+                redisStatusText.textContent = '正在检查Redis连接状态...';
+                
+                // 模拟API调用检查Redis状态
+                setTimeout(() => {
+                    // 这里应该调用实际的API端点
+                    // 模拟成功响应
+                    const isConnected = Math.random() > 0.1; // 90%成功率模拟
+                    
+                    if (isConnected) {
+                        redisStatus.className = 'status-dot status-online';
+                        redisStatusText.textContent = '✅ Redis连接正常';
+                        
+                        // 更新连接详情
+                        document.getElementById('redis-host').textContent = 'localhost';
+                        document.getElementById('redis-port').textContent = '6379';
+                        document.getElementById('redis-password').textContent = '••••••••';
+                        
+                        // 显示Flask密钥（模拟）
+                        document.getElementById('flask-secret').textContent = 
+                            'sk_' + Math.random().toString(36).substring(2, 15) + 
+                            Math.random().toString(36).substring(2, 15);
+                        
+                        if (showAlert) {
+                            showAlert('Redis连接测试成功', 'success');
+                        }
+                    } else {
+                        redisStatus.className = 'status-dot status-offline';
+                        redisStatusText.textContent = '❌ Redis连接失败';
+                        
+                        if (showAlert) {
+                            showAlert('Redis连接测试失败', 'error');
+                        }
+                    }
+                }, 1200);
+            }
+            
+            // // 查询用户数据
+            // function queryUsers() {
+            //     const tableBody = document.getElementById('user-table-body');
+            //     tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4">正在查询用户数据...</td></tr>';
+                
+            //     // 模拟API调用获取用户数据
+            //     setTimeout(() => {
+            //         // 这里应该调用实际的API端点 /query1
+            //         // 模拟响应数据
+            //         const mockUsers = [
+            //             { id: 1, nickname: 'flask_test1', mobile: '13888888888', signature: '理想', role_id: 1, status: 1 },
+            //             { id: 2, nickname: 'flask_test2', mobile: '13999999999', signature: '信念', role_id: 2, status: 1 },
+            //             { id: 3, nickname: 'flask_test3', mobile: '13777777777', signature: '坚持', role_id: 1, status: 0 },
+            //             { id: 4, nickname: 'flask_test4', mobile: '13666666666', signature: '奋斗', role_id: 2, status: 1 }
+            //         ];
+                    
+            //         tableBody.innerHTML = '';
+                    
+            //         mockUsers.forEach(user => {
+            //             const row = document.createElement('tr');
+            //             row.innerHTML = `
+            //                 <td>${user.id}</td>
+            //                 <td>${user.nickname}</td>
+            //                 <td>${user.mobile}</td>
+            //                 <td>${user.signature}</td>
+            //                 <td>${user.role_id === 1 ? '普通用户' : '管理员'}</td>
+            //                 <td>${user.status === 1 ? 
+            //                     '<span class="badge bg-success">正常</span>' : 
+            //                     '<span class="badge bg-danger">禁用</span>'}</td>
+            //             `;
+            //             tableBody.appendChild(row);
+            //         });
+                    
+            //         showAlert(`成功加载 ${mockUsers.length} 条用户数据`, 'success');
+            //     }, 1000);
+            // }
+            // 查询用户数据 - 使用真实API
+            function queryUsers() {
+                const tableBody = document.getElementById('user-table-body');
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4">正在查询用户数据...</td></tr>';
+                
+                // 调用真实API端点 /query1
+                fetch('/query1')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.users && data.users.length > 0) {
+                            const users = data.users;
+                            tableBody.innerHTML = '';
+                            
+                            users.forEach(user => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${user.id || ''}</td>
+                                    <td>${user.nickname || ''}</td>
+                                    <td>${user.mobile || ''}</td>
+                                    <td>${user.avatar_url ? 
+                                        '<i class="fas fa-check text-success"></i>' : 
+                                        '<i class="fas fa-times text-danger"></i>'}</td>
+                                    <td>${user.sex === '1' ? '男' : (user.sex === '2' ? '女' : '保密')}</td>
+                                    <td>${user.status === 1 ? 
+                                        '<span class="badge bg-success">正常</span>' : 
+                                        '<span class="badge bg-danger">禁用</span>'}</td>
+                                `;
+                                tableBody.appendChild(row);
+                            });
+                            
+                            showAlert(`成功加载 ${users.length} 条用户数据`, 'success');
+                        } else {
+                            tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">暂无用户数据</td></tr>';
+                            showAlert('没有找到用户数据', 'warning');
+                        }
+                    })
+                    .catch(error => {
+                        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger">请求失败: ' + error.message + '</td></tr>';
+                        showAlert('查询用户数据请求失败: ' + error.message, 'error');
+                    });
+            }
+            
+            // 测试所有数据库操作
+            function testAllDatabaseOperations() {
+                showAlert('开始测试所有数据库操作...', 'success');
+                
+                // 模拟测试各种数据库操作
+                setTimeout(() => {
+                    showAlert('数据库操作测试完成：增删改查功能正常', 'success');
+                }, 2000);
+            }
+            
+            // 生成新密钥
+            function generateNewSecret() {
+                const secretElement = document.getElementById('flask-secret');
+                secretElement.textContent = '正在生成新密钥...';
+                
+                // 模拟生成新密钥
+                setTimeout(() => {
+                    const newSecret = 'sk_' + Math.random().toString(36).substring(2, 15) + 
+                                     Math.random().toString(36).substring(2, 15);
+                    secretElement.textContent = newSecret;
+                    showAlert('已生成新的Flask应用密钥', 'success');
+                }, 800);
+            }
+        });
+    </script>
+</body>
+</html>

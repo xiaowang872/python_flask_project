@@ -1,0 +1,2 @@
+2025-10-08 11:13:30,610 - root - WARNING - this is a log message 用户操作哦 - user_id:123 - action:login
+2025-10-08 11:13:30,611 - root - INFO - 这是一条信息消息 - user_id:456 - action:logout
