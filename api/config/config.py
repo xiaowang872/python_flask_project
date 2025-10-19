@@ -1,3 +1,4 @@
+# F:\vue_flask_project\vue_flask_project_one\flask\pythonProject1\api\config\config.py
 # 原始一点的写法，后面我们将他封装成类
 # connection = pymysql.connect(
 #     'host': '192.168.117.200',
@@ -6,6 +7,7 @@
 #     'password': '123456',
 #     'database': 'flask_databases',
 # )
+# 
 import logging
 from redis import StrictRedis
 class Config:

@@ -1,3 +1,4 @@
+# F:\vue_flask_project\vue_flask_project_one\flask\pythonProject1\api\models\base.py
 from datetime import datetime
 from api import db
 from api.libs.db_utils import session_commit
